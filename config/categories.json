@@ -1,0 +1,37 @@
+{
+  "extensions": {
+    "audio": [".wav", ".aif", ".aiff", ".flac", ".mp3", ".ogg", ".m4a"],
+    "midi": [".mid", ".midi"],
+    "archives": [".zip", ".rar", ".7z"],
+    "images": [".jpg", ".jpeg", ".png", ".gif", ".webp"],
+    "documentation": [".pdf", ".txt", ".nfo", ".url", ".rtf", ".md"]
+  },
+  "aliases": {
+    "Kick": ["kick", "kicks", "bd", "bass drum", "bassdrum"],
+    "Snare": ["snare", "snares"],
+    "Clap": ["clap", "claps"],
+    "HiHat Closed": ["chh", "closed hat", "closed hats", "closed hh", "closed hihat", "closed hi hat"],
+    "HiHat Open": ["ohh", "open hat", "open hats", "open hh", "open hihat", "open hi hat", "ophat"],
+    "HiHat": ["hi hat", "hi hats", "hihat", "hihats", "hat", "hats", "clhat"],
+    "Rim": ["rim", "rimshot", "rim shot"],
+    "Tom": ["tom", "toms"],
+    "Percussion": ["perc", "percussion", "shaker", "conga", "sidestick", "tambourine"],
+    "Cymbal": ["cymbal", "cymbals", "crash", "ride"],
+    "Bass": ["bass"],
+    "808": ["808"],
+    "Synth": ["synth", "synths", "pad", "pads", "lead", "leads", "pluck", "plucks"],
+    "Keys": ["keys", "keyboard", "piano", "rhodes", "organ", "bells"],
+    "Guitar": ["guitar", "guitars"],
+    "Vocal": ["vocal", "vocals", "voice", "vox"],
+    "FX": ["fx", "sfx", "sound effect", "effects"],
+    "Foley": ["foley"],
+    "Texture": ["texture", "textures", "ambience", "atmosphere"],
+    "Melody": ["melody", "melodic", "music loops", "music loop", "music mix"],
+    "Drums": ["drum", "drums"],
+    "Arpeggio": ["arp", "arpeggio", "arpeggiator"],
+    "Brass": ["brass", "horn", "horns", "trumpet", "trombone"],
+    "Woodwind": ["woodwind", "flute", "sax", "saxophone", "clarinet"],
+    "Strings": ["strings", "string", "violin", "cello"],
+    "Chords": ["chord", "chords", "progression", "progressions"]
+  }
+}
