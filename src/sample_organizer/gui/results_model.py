@@ -27,7 +27,10 @@ class ResultsModel(QAbstractTableModel):
             return None
         record = self.records[index.row()]
         relative = destination_for(record)
-        target = str(Path(self.destination) / relative) if relative else "—"
+        try:
+            target = str(Path(self.destination) / relative) if relative else "—"
+        except ValueError:
+            target = "Destino manual no válido"
         values = [record.filename, record.family,
                   record.category or ("Metadatos macOS pendientes de eliminación"
                                       if record.is_macos_metadata else

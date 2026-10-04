@@ -8,7 +8,7 @@ from pathlib import Path
 from .models import SampleRecord
 
 FIELDS = ["original_path", "destination_path", "filename", "extension", "library", "family",
-          "category", "confidence", "classification_reason", "action", "duplicate_hash",
+          "category", "confidence", "manual_destination", "classification_reason", "action", "duplicate_hash",
           "duplicate_of", "renamed_due_to_collision", "error"]
 
 
@@ -35,6 +35,7 @@ def _row(record: SampleRecord) -> dict:
         "family": record.family,
         "category": record.category,
         "confidence": record.confidence,
+        "manual_destination": str(record.manual_destination) if record.manual_destination is not None else "",
         "classification_reason": "; ".join(record.reasons),
         "action": record.action,
         "duplicate_hash": record.duplicate_hash,

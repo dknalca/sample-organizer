@@ -80,13 +80,24 @@ class MainWindow(QMainWindow):
                                   ".part", ".lrc", "Archivos macOS", "Duplicados"])
         self.filter_box.currentTextChanged.connect(self._refresh_table)
         filter_row.addWidget(self.filter_box)
+        self.choose_destination_button = QPushButton("Elegir carpeta para este archivo…")
+        self.choose_destination_button.clicked.connect(self._choose_record_destination)
+        self.choose_destination_button.setEnabled(False)
+        filter_row.addWidget(self.choose_destination_button)
+        self.clear_destination_button = QPushButton("Usar destino automático")
+        self.clear_destination_button.clicked.connect(self._clear_record_destination)
+        self.clear_destination_button.setEnabled(False)
+        filter_row.addWidget(self.clear_destination_button)
         filter_row.addStretch(1)
         layout.addLayout(filter_row)
         self.table = QTableView()
         self.table.setAlternatingRowColors(True)
         self.table.setWordWrap(False)
+        self.table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
+        self.table.setSelectionMode(QTableView.SelectionMode.SingleSelection)
         self.model = ResultsModel()
         self.table.setModel(self.model)
+        self.table.selectionModel().selectionChanged.connect(self._update_destination_buttons)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setColumnWidth(0, 220)
         layout.addWidget(self.table, 1)
@@ -113,6 +124,7 @@ class MainWindow(QMainWindow):
                 self.destination_label.setText(selected)
             self.result = None
             self.organize_button.setEnabled(False)
+            self._update_destination_buttons()
 
     def _analyze(self):
         self.result = None
@@ -158,7 +170,9 @@ class MainWindow(QMainWindow):
         self.result = None
         self.model = ResultsModel()
         self.table.setModel(self.model)
+        self.table.selectionModel().selectionChanged.connect(self._update_destination_buttons)
         self.summary.setText("Análisis detenido. No se modificó ningún archivo.")
+        self._update_destination_buttons()
         self.activity.setText("Tarea detenida por el usuario.")
         self.log.appendPlainText("Análisis cancelado; el origen no se modificó.")
         self._set_busy(False)
@@ -170,8 +184,69 @@ class MainWindow(QMainWindow):
         records = [r for r in self.result.records if ResultsFilter.accepts(r, selection)]
         self.model = ResultsModel(records, str(self.destination))
         self.table.setModel(self.model)
+        self.table.selectionModel().selectionChanged.connect(self._update_destination_buttons)
         self.table.setColumnWidth(0, 220)
         self.table.horizontalHeader().setStretchLastSection(True)
+        self._update_destination_buttons()
+
+    def _selected_record(self):
+        selection = self.table.selectionModel()
+        if selection is None:
+            return None
+        rows = selection.selectedRows()
+        if not rows:
+            return None
+        row = rows[0].row()
+        return self.model.records[row] if row < len(self.model.records) else None
+
+    def _update_destination_buttons(self, *_):
+        record = self._selected_record()
+        available = record is not None and record.kind in {"audio", "midi"} and self.result is not None
+        self.choose_destination_button.setEnabled(bool(available))
+        self.clear_destination_button.setEnabled(bool(available and record.manual_destination is not None))
+
+    def _choose_record_destination(self):
+        record = self._selected_record()
+        if record is None or record.kind not in {"audio", "midi"}:
+            return
+        root = self.destination.expanduser().resolve(strict=False)
+        start = root
+        if record.manual_destination is not None:
+            candidate = root / record.manual_destination
+            if candidate.is_dir():
+                start = candidate
+        try:
+            root.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            QMessageBox.warning(self, "No se pudo abrir el destino", str(exc))
+            return
+        selected = QFileDialog.getExistingDirectory(
+            self, "Elegir carpeta dentro del destino", str(start),
+        )
+        if not selected:
+            return
+        chosen = Path(selected).expanduser().resolve(strict=True)
+        try:
+            relative = chosen.relative_to(root)
+        except ValueError:
+            QMessageBox.warning(self, "Carpeta fuera del destino",
+                                "Elige una carpeta dentro de la carpeta de destino seleccionada.")
+            return
+        if any((root / Path(*relative.parts[:index])).is_symlink()
+               for index in range(1, len(relative.parts) + 1)):
+            QMessageBox.warning(self, "Carpeta no segura",
+                                "No se pueden elegir carpetas que atraviesen enlaces simbólicos.")
+            return
+        record.manual_destination = relative
+        self._refresh_table()
+        self.log.appendPlainText(f"Destino manual para {record.filename}: {relative}")
+
+    def _clear_record_destination(self):
+        record = self._selected_record()
+        if record is None:
+            return
+        record.manual_destination = None
+        self._refresh_table()
 
     def _organize(self):
         if not self.result:

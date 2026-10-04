@@ -41,5 +41,5 @@ app = BUNDLE(
     name="Sample Organizer.app",
     icon=None,
     bundle_identifier="com.sampleorganizer.desktop",
-    version="0.1.0",
+    version="0.1.1",
 )

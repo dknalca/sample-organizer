@@ -14,6 +14,11 @@ from .reporting import write_reports
 def destination_for(record: SampleRecord) -> Path | None:
     if record.kind not in {"audio", "midi"}:
         return None
+    if record.manual_destination is not None:
+        manual = record.manual_destination
+        if manual.is_absolute() or ".." in manual.parts:
+            raise ValueError("La carpeta elegida manualmente debe estar dentro del destino")
+        return manual / record.filename
     library = record.library or "Unknown Library"
     if record.family == "Unclassified":
         return Path("Unclassified") / library / record.filename

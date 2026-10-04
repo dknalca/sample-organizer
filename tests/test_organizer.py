@@ -27,6 +27,45 @@ def test_copy_collision_keeps_both_and_writes_reports(tmp_path):
     assert all(row["original_path"] and row["classification_reason"] for row in rows)
 
 
+def test_unclassified_sample_can_be_sent_to_a_manual_destination(tmp_path):
+    source = tmp_path / "Samples"
+    destination = tmp_path / "Organized"
+    sample = source / "Pack" / "Audio" / "mystery.wav"
+    sample.parent.mkdir(parents=True)
+    sample.write_bytes(b"audio")
+    selected = destination / "My Chosen Folder"
+    selected.mkdir(parents=True)
+
+    result = scan(source, destination)
+    record = result.records[0]
+    assert record.family == "Unclassified"
+    record.manual_destination = Path("My Chosen Folder")
+    outcome = organize(result, destination)
+
+    assert outcome.copied == 1
+    assert (selected / "mystery.wav").read_bytes() == b"audio"
+    assert Path(record.destination_path) == selected / "mystery.wav"
+    with outcome.report_csv.open(encoding="utf-8-sig", newline="") as stream:
+        row = next(csv.DictReader(stream))
+    assert row["manual_destination"] == "My Chosen Folder"
+
+
+def test_manual_destination_cannot_escape_organization_root(tmp_path):
+    source = tmp_path / "Samples"
+    destination = tmp_path / "Organized"
+    sample = source / "Pack" / "Audio" / "mystery.wav"
+    sample.parent.mkdir(parents=True)
+    sample.write_bytes(b"audio")
+    result = scan(source, destination)
+    result.records[0].manual_destination = Path("../Outside")
+
+    outcome = organize(result, destination)
+
+    assert outcome.copied == 0
+    assert outcome.errors
+    assert not (tmp_path / "Outside" / "mystery.wav").exists()
+
+
 def test_existing_destination_file_is_not_overwritten(tmp_path):
     source = tmp_path / "Samples"
     destination = tmp_path / "Organized"

@@ -19,6 +19,7 @@ class SampleRecord:
     duplicate_of: str = ""
     error: str = ""
     destination_path: str = ""
+    manual_destination: Path | None = None
     action: str = ""
     renamed_due_to_collision: bool = False
 

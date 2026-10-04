@@ -20,6 +20,8 @@ La eliminación de archivos `.part`, `.lrc` y auxiliares de macOS (`.DS_Store`, 
 
 Las reglas de extensiones y alias editables están en `config/categories.json`. El núcleo de clasificación, escaneo, organización e informes no depende de la GUI.
 
+En los resultados, selecciona un archivo y pulsa **Elegir carpeta para este archivo…** para asignarle una carpeta dentro del destino elegido. Esto permite organizar manualmente los archivos sin clasificar; puedes volver a la ruta calculada con **Usar destino automático**. La elección manual queda registrada en los informes y no modifica el original.
+
 ## Empaquetado
 
 Se incluye una especificación para PyInstaller en `packaging/sample-organizer.spec`. Para generar el ejecutable en cada plataforma, instala el extra `package` y ejecuta `pyinstaller --noconfirm packaging/sample-organizer.spec` en el sistema objetivo. La release inicial incluye una app para macOS Intel (x86_64), compilada y probada en macOS.
